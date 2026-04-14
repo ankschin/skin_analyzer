@@ -12,6 +12,7 @@ A single-page web application that uses the device camera and AI vision to analy
 - **AC2**: If camera permission is denied or unavailable, a file upload input is shown as fallback
 - **AC3**: A "Capture" button freezes the current video frame as the photo to analyze
 - **AC4**: Works on desktop (webcam) and mobile (front-facing camera)
+- **AC5**: The camera stream is stopped immediately after a photo is captured or an image is uploaded (camera indicator light turns off)
 
 ### F2 — Image Preview & Retake
 - **AC1**: After capture/upload, the image is shown in a preview before analysis starts

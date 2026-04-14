@@ -57,6 +57,13 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
     };
   }, [startCamera]);
 
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  };
+
   const handleCapture = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -74,6 +81,7 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
     ctx.drawImage(video, 0, 0);
 
     const imageBase64 = canvas.toDataURL("image/jpeg", 0.9);
+    stopCamera();
     onCapture(imageBase64);
   };
 
@@ -84,6 +92,7 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
     const reader = new FileReader();
     reader.onloadend = () => {
       const result = reader.result as string;
+      stopCamera();
       onCapture(result);
     };
     reader.readAsDataURL(file);
