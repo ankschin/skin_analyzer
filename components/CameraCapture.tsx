@@ -15,7 +15,15 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isCaptureReady, setIsCaptureReady] = useState(false);
 
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
   const startCamera = useCallback(async () => {
+    stopCamera(); // stop any existing stream before starting a new one
     setIsLoading(true);
     setCameraError(null);
 
@@ -45,24 +53,15 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
       setCameraError("Camera access was denied or unavailable.");
       setIsLoading(false);
     }
-  }, []);
+  }, [stopCamera]);
 
   useEffect(() => {
     startCamera();
 
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
+      stopCamera();
     };
-  }, [startCamera]);
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-  };
+  }, [startCamera, stopCamera]);
 
   const handleCapture = () => {
     const video = videoRef.current;

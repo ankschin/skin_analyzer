@@ -13,6 +13,7 @@ A single-page web application that uses the device camera and AI vision to analy
 - **AC3**: A "Capture" button freezes the current video frame as the photo to analyze
 - **AC4**: Works on desktop (webcam) and mobile (front-facing camera)
 - **AC5**: The camera stream is stopped immediately after a photo is captured or an image is uploaded (camera indicator light turns off)
+- **AC6**: On retake, any existing stream is stopped before a new one starts — prevents zombie streams from React's double-invoke in StrictMode; `stopCamera` is a stable `useCallback` and is called at the top of `startCamera` and in the effect cleanup
 
 ### F2 — Image Preview & Retake
 - **AC1**: After capture/upload, the image is shown in a preview before analysis starts
