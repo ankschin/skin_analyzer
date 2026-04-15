@@ -1,13 +1,22 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-display",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-body",
+});
 
 export const metadata: Metadata = {
-  title: "Skin Analyzer — AI-Powered Skincare",
+  title: "Lumina — AI Skin Analysis",
   description:
-    "Get a personalized skin analysis and skincare routine powered by AI. No login required.",
+    "Professional AI-powered skin analysis and personalized skincare recommendations.",
 };
 
 export default function RootLayout({
@@ -17,7 +26,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-50 min-h-screen`}>{children}</body>
+      <body
+        className={`${cormorant.variable} ${dmSans.variable} font-body bg-skin-bg text-skin-cream min-h-screen`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

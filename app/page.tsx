@@ -9,6 +9,10 @@ import type { AnalysisResult } from "@/lib/types";
 
 type Step = "camera" | "preview" | "analyzing" | "results";
 
+function stepIndex(step: Step): number {
+  return { camera: 0, preview: 1, analyzing: 1, results: 2 }[step];
+}
+
 export default function HomePage() {
   const [step, setStep] = useState<Step>("camera");
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -29,7 +33,6 @@ export default function HomePage() {
 
   const handleAnalyze = async () => {
     if (!capturedImage) return;
-
     setStep("analyzing");
     setError(null);
 
@@ -39,22 +42,15 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageBase64: capturedImage }),
       });
-
       const data = await response.json();
-
       if (!response.ok || data.error) {
-        throw new Error(
-          data.error ?? "Something went wrong. Please try again."
-        );
+        throw new Error(data.error ?? "Something went wrong. Please try again.");
       }
-
       setAnalysisResult(data as AnalysisResult);
       setStep("results");
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again."
+        err instanceof Error ? err.message : "Something went wrong. Please try again."
       );
       setStep("preview");
     }
@@ -67,16 +63,57 @@ export default function HomePage() {
     setStep("camera");
   };
 
+  const idx = stepIndex(step);
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-purple-50/30">
-      <div className="mx-auto max-w-2xl px-4 py-8">
+    <main className="min-h-screen bg-skin-bg relative overflow-x-hidden">
+      {/* Ambient glow orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-1/3 -left-1/4 w-3/4 h-3/4 rounded-full bg-skin-rose/5 blur-[160px]" />
+        <div className="absolute -bottom-1/4 -right-1/4 w-2/3 h-2/3 rounded-full bg-skin-gold/5 blur-[160px]" />
+      </div>
+
+      <div className="relative mx-auto max-w-md px-5 py-10 z-10">
+
         {/* Header */}
-        <header className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 mb-4">
-            <span className="text-lg">✨</span>
-            <span className="text-sm font-medium text-indigo-600">AI-Powered Analysis</span>
+        <header className="flex items-end justify-between mb-10 animate-fade-up">
+          <div>
+            <h1 className="font-display text-[2.4rem] font-light text-skin-cream tracking-wide leading-none">
+              Lumina
+            </h1>
+            <p className="text-[9px] text-skin-gold font-body uppercase tracking-[0.28em] mt-2">
+              AI · Skin Analysis
+            </p>
+          </div>
+
+          {/* Step progress */}
+          <div className="flex items-center gap-2 pb-1">
+            {["Capture", "Review", "Results"].map((label, i) => (
+              <div key={label} className="flex items-center gap-2">
+                <div
+                  className={`h-[2px] rounded-full transition-all duration-700 ${
+                    i <= idx ? "w-8 bg-skin-gold" : "w-4 bg-skin-border"
+                  }`}
+                />
+                {i < 2 && (
+                  <div
+                    className={`w-1 h-1 rounded-full transition-colors duration-500 ${
+                      i < idx ? "bg-skin-gold/50" : "bg-skin-border"
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
           </div>
         </header>
+
+        {/* Error banner */}
+        {error && (
+          <div className="mb-5 bg-skin-red/10 border border-skin-red/25 rounded-2xl px-4 py-3 flex items-start gap-3">
+            <span className="text-skin-red text-xs mt-0.5 flex-shrink-0">✕</span>
+            <p className="text-sm text-skin-cream/80 font-body leading-relaxed">{error}</p>
+          </div>
+        )}
 
         {/* Step: Camera */}
         {step === "camera" && (
@@ -85,46 +122,38 @@ export default function HomePage() {
 
         {/* Step: Preview / Analyzing */}
         {(step === "preview" || step === "analyzing") && capturedImage && (
-          <div className="flex flex-col gap-4">
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-700 text-sm flex items-start gap-2">
-                <span className="flex-shrink-0 mt-0.5">⚠️</span>
-                <div>
-                  <p className="font-semibold mb-0.5">Analysis failed</p>
-                  <p>{error}</p>
-                </div>
-              </div>
-            )}
-            <ImagePreview
-              imageBase64={capturedImage}
-              onRetake={handleRetake}
-              onAnalyze={handleAnalyze}
-              isAnalyzing={step === "analyzing"}
-            />
-          </div>
+          <ImagePreview
+            imageBase64={capturedImage}
+            onRetake={handleRetake}
+            onAnalyze={handleAnalyze}
+            isAnalyzing={step === "analyzing"}
+          />
         )}
 
         {/* Step: Results */}
         {step === "results" && analysisResult && (
-          <div className="flex flex-col gap-8">
-            <SkinReport result={analysisResult} capturedImage={capturedImage} />
+          <div className="flex flex-col gap-10">
+            <SkinReport
+              result={analysisResult}
+              capturedImage={capturedImage}
+              onReset={handleReset}
+            />
             <SkincareRoutine
               morningRoutine={analysisResult.morningRoutine}
               eveningRoutine={analysisResult.eveningRoutine}
               tips={analysisResult.tips}
             />
-
-            <div className="flex flex-col items-center gap-3 pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-500">Want to check again?</p>
+            <div className="pb-12 flex justify-center">
               <button
                 onClick={handleReset}
-                className="rounded-xl bg-indigo-600 px-8 py-3 text-white font-semibold hover:bg-indigo-700 active:scale-95 transition-all"
+                className="font-body text-sm text-skin-muted hover:text-skin-gold transition-colors border border-skin-border hover:border-skin-gold/40 rounded-full px-8 py-2.5 active:scale-95"
               >
-                Analyze Again
+                New Analysis
               </button>
             </div>
           </div>
         )}
+
       </div>
     </main>
   );

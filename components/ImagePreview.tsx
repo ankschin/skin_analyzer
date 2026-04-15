@@ -14,51 +14,86 @@ export default function ImagePreview({
   isAnalyzing,
 }: ImagePreviewProps) {
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-6 animate-fade-up">
+      {/* Header */}
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Review Your Photo</h2>
-        <p className="mt-1 text-gray-500">
-          Make sure your face is clearly visible and well-lit before analyzing.
+        <h2 className="font-display text-2xl font-light text-skin-cream mb-1.5">
+          {isAnalyzing ? "Analyzing Skin" : "Review Photo"}
+        </h2>
+        <p className="text-xs text-skin-muted font-body tracking-wide">
+          {isAnalyzing
+            ? "AI is examining your skin conditions…"
+            : "Ensure your face is clear and well-lit"}
         </p>
       </div>
 
-      <div className="relative w-full max-w-md">
+      {/* Image + overlay */}
+      <div className="relative w-full rounded-[28px] overflow-hidden ring-1 ring-skin-border aspect-[3/4]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imageBase64}
           alt="Captured face photo for skin analysis"
-          className="w-full rounded-2xl object-cover aspect-[3/4]"
+          className="w-full h-full object-cover"
         />
 
+        {/* Analyzing overlay */}
         {isAnalyzing && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-60 rounded-2xl gap-4">
-            <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
-            <p className="text-white font-semibold text-lg">Analyzing your skin…</p>
-            <p className="text-white text-sm opacity-75">This may take a few seconds</p>
+          <div className="absolute inset-0 bg-skin-bg/72 backdrop-blur-sm flex flex-col items-center justify-end pb-12 gap-6">
+            {/* Scanning beam */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-skin-gold/70 to-transparent animate-scan-beam" />
+            </div>
+
+            {/* Grid overlay */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[70%] h-[72%] border border-skin-gold/15 rounded-xl relative">
+                <div className="absolute left-0 right-0 top-1/3 h-[1px] bg-skin-gold/8" />
+                <div className="absolute left-0 right-0 top-2/3 h-[1px] bg-skin-gold/8" />
+                <div className="absolute top-0 bottom-0 left-1/3 w-[1px] bg-skin-gold/8" />
+                <div className="absolute top-0 bottom-0 left-2/3 w-[1px] bg-skin-gold/8" />
+              </div>
+            </div>
+
+            {/* Status indicator */}
+            <div className="relative z-10 flex flex-col items-center gap-3">
+              <div className="relative w-10 h-10">
+                <div className="absolute inset-0 rounded-full border border-skin-rim" />
+                <div className="absolute inset-0 rounded-full border-t border-skin-gold animate-spin-slow" />
+                <div className="absolute inset-[3px] rounded-full border-b border-skin-rose/50 animate-spin-rev" />
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-skin-gold font-body tracking-[0.2em] uppercase">
+                  Processing
+                </p>
+                <p className="text-[10px] text-skin-muted font-body mt-0.5">
+                  Gemini AI is reviewing your photo
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      <div className="flex w-full max-w-md gap-3">
-        <button
-          onClick={onRetake}
-          disabled={isAnalyzing}
-          className="flex-1 rounded-xl border-2 border-gray-300 px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Retake
-        </button>
+      {/* Actions */}
+      {!isAnalyzing && (
+        <div className="flex w-full gap-3">
+          <button
+            onClick={onRetake}
+            className="flex-1 rounded-full border border-skin-border bg-transparent text-skin-muted text-sm font-body py-3.5 hover:border-skin-rim hover:text-skin-cream transition-all active:scale-95"
+          >
+            Retake
+          </button>
+          <button
+            onClick={onAnalyze}
+            className="flex-[2] rounded-full bg-skin-gold text-skin-bg text-sm font-body font-medium py-3.5 hover:bg-skin-amber transition-all active:scale-95 shadow-lg shadow-skin-gold/20"
+          >
+            Analyze Skin
+          </button>
+        </div>
+      )}
 
-        <button
-          onClick={onAnalyze}
-          disabled={isAnalyzing}
-          className="flex-[2] rounded-xl bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isAnalyzing ? "Analyzing…" : "Analyze Skin"}
-        </button>
-      </div>
-
-      <p className="text-xs text-gray-400 max-w-sm text-center">
-        Your photo is sent securely to our AI for analysis. It is not stored or shared.
+      <p className="text-[10px] text-skin-faint text-center font-body max-w-xs">
+        Your photo is analyzed securely and is never stored or shared.
       </p>
     </div>
   );

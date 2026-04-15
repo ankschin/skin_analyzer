@@ -10,6 +10,7 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const startCallIdRef = useRef(0);
 
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,12 +22,14 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
       streamRef.current = null;
     }
     if (videoRef.current) {
+      videoRef.current.pause();
       videoRef.current.srcObject = null;
     }
   }, []);
 
   const startCamera = useCallback(async () => {
-    stopCamera(); // stop any existing stream before starting a new one
+    stopCamera();
+    const callId = ++startCallIdRef.current;
     setIsLoading(true);
     setCameraError(null);
 
@@ -35,6 +38,11 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
         video: { facingMode: "user" },
         audio: false,
       });
+
+      if (callId !== startCallIdRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
 
       streamRef.current = stream;
 
@@ -60,7 +68,6 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
 
   useEffect(() => {
     startCamera();
-
     return () => {
       stopCamera();
     };
@@ -77,7 +84,6 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Mirror the image to match what the user sees in the video feed
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0);
@@ -101,88 +107,139 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-6 animate-fade-up">
+      {/* Heading */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Skin Analyzer</h1>
-        <p className="mt-2 text-gray-500">
-          Position your face in the frame and take a photo for your personalized skin analysis.
+        <h2 className="font-display text-2xl font-light text-skin-cream mb-1.5">
+          Face Capture
+        </h2>
+        <p className="text-xs text-skin-muted font-body tracking-wide">
+          Center your face within the guide frame
         </p>
       </div>
 
       {!cameraError ? (
-        <div className="relative w-full max-w-md">
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-900 rounded-2xl z-10">
-              <div className="flex flex-col items-center gap-3 text-white">
-                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm">Starting camera…</span>
+        <>
+          {/* Viewfinder */}
+          <div className="relative w-full">
+            {/* Loading state */}
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-skin-surface rounded-[28px] z-10 aspect-[3/4]">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative w-10 h-10">
+                    <div className="absolute inset-0 rounded-full border border-skin-border" />
+                    <div className="absolute inset-0 rounded-full border-t border-skin-gold animate-spin" />
+                  </div>
+                  <span className="text-[10px] text-skin-muted font-body tracking-[0.18em] uppercase">
+                    Initializing
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Camera frame */}
+            <div className="relative rounded-[28px] overflow-hidden ring-1 ring-skin-border bg-skin-surface aspect-[3/4]">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+                style={{ transform: "scaleX(-1)" }}
+              />
+
+              {/* Face guide overlay */}
+              {!isLoading && (
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* Dashed oval */}
+                  <svg
+                    className="absolute inset-0 w-full h-full"
+                    viewBox="0 0 100 133"
+                    preserveAspectRatio="none"
+                  >
+                    <ellipse
+                      cx="50" cy="48" rx="26" ry="34"
+                      fill="none"
+                      stroke="rgba(201,169,110,0.30)"
+                      strokeWidth="0.45"
+                      strokeDasharray="2.5 2"
+                    />
+                  </svg>
+
+                  {/* Corner brackets — gold */}
+                  <div className="absolute top-[9%]  left-[15%]  w-8 h-8 border-t border-l border-skin-gold/50" />
+                  <div className="absolute top-[9%]  right-[15%] w-8 h-8 border-t border-r border-skin-gold/50" />
+                  <div className="absolute bottom-[20%] left-[15%]  w-8 h-8 border-b border-l border-skin-gold/50" />
+                  <div className="absolute bottom-[20%] right-[15%] w-8 h-8 border-b border-r border-skin-gold/50" />
+                </div>
+              )}
+
+              {/* Bottom gradient fade */}
+              <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-black/65 to-transparent pointer-events-none" />
+
+              {/* Shutter button */}
+              <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+                <button
+                  onClick={handleCapture}
+                  disabled={!isCaptureReady}
+                  aria-label="Capture photo"
+                  className="relative w-[68px] h-[68px] flex items-center justify-center group disabled:opacity-25 disabled:cursor-not-allowed"
+                >
+                  {/* Outer ring */}
+                  <div className="absolute inset-0 rounded-full border border-white/30 group-hover:border-skin-gold/60 transition-colors duration-300" />
+                  {/* Inner ring */}
+                  <div className="absolute inset-[5px] rounded-full border border-white/10 group-hover:border-skin-gold/25 transition-colors duration-300" />
+                  {/* Disc */}
+                  <div className="w-[42px] h-[42px] rounded-full bg-white/90 group-hover:bg-skin-cream group-active:scale-90 transition-all duration-150 shadow-lg shadow-black/40" />
+                </button>
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Mirror video feed so it feels like a selfie mirror */}
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full rounded-2xl bg-gray-900 aspect-[3/4] object-cover"
-            style={{ transform: "scaleX(-1)" }}
-          />
-
-          {/* Face guide overlay */}
-          {!isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-48 h-64 border-4 border-white border-opacity-60 rounded-full" />
-            </div>
-          )}
-        </div>
+          {/* Upload fallback */}
+          <label className="text-[11px] text-skin-faint font-body cursor-pointer">
+            or{" "}
+            <span className="text-skin-muted hover:text-skin-gold transition-colors underline underline-offset-2 decoration-skin-muted/40">
+              upload a photo
+            </span>
+            <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+          </label>
+        </>
       ) : (
-        <div className="w-full max-w-md rounded-2xl border-2 border-dashed border-gray-300 bg-white p-8 text-center">
-          <div className="text-4xl mb-3">📷</div>
-          <p className="text-gray-600 font-medium mb-1">Camera unavailable</p>
-          <p className="text-sm text-gray-400 mb-6">{cameraError}</p>
-          <label className="cursor-pointer inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-700 transition-colors">
-            <span>Upload a photo</span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
+        /* Camera error */
+        <div className="w-full rounded-[28px] border border-skin-border bg-skin-surface p-10 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-skin-card border border-skin-border flex items-center justify-center mx-auto mb-5">
+            <svg
+              className="w-6 h-6 text-skin-muted"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
+              />
+            </svg>
+          </div>
+          <p className="font-display text-lg text-skin-cream font-light mb-2">
+            Camera Unavailable
+          </p>
+          <p className="text-xs text-skin-muted mb-7 font-body">{cameraError}</p>
+          <label className="cursor-pointer inline-flex items-center gap-2 rounded-full border border-skin-gold/40 bg-skin-gold/10 px-7 py-2.5 text-skin-gold text-sm font-body hover:bg-skin-gold/20 transition-all active:scale-95">
+            Upload a Photo
+            <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
           </label>
         </div>
       )}
 
-      {/* Hidden canvas for frame capture */}
       <canvas ref={canvasRef} className="hidden" />
-
-      <div className="flex flex-col items-center gap-3 w-full max-w-md">
-        {!cameraError && (
-          <button
-            onClick={handleCapture}
-            disabled={!isCaptureReady}
-            className="w-full rounded-xl bg-indigo-600 px-6 py-4 text-white font-semibold text-lg hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Capture Photo
-          </button>
-        )}
-
-        {!cameraError && (
-          <div className="text-center">
-            <span className="text-sm text-gray-400">or </span>
-            <label className="text-sm text-indigo-600 cursor-pointer hover:underline">
-              upload an image
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-            </label>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

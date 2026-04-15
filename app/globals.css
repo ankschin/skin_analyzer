@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Score ring fill animation — uses a CSS variable for dynamic offset */
+@keyframes score-ring-fill {
+  from { stroke-dashoffset: 339.3; }
+  to   { stroke-dashoffset: var(--ring-offset, 0); }
+}
+
+.score-ring {
+  stroke-dasharray: 339.3;
+  stroke-dashoffset: 339.3;
+  animation: score-ring-fill 1.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+}
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #3A3530 transparent;
+  }
+
+  *::-webkit-scrollbar       { width: 4px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: #3A3530; border-radius: 4px; }
+}

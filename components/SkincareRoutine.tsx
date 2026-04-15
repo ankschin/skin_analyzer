@@ -8,83 +8,76 @@ interface SkincareRoutineProps {
   tips: string[];
 }
 
-function StepCard({ step, index, accent }: { step: RoutineStep; index: number; accent: string }) {
+function StepCard({ step, index }: { step: RoutineStep; index: number }) {
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-      <div className="flex items-start gap-3">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5 text-white ${accent}`}>
+    <div className="flex items-start gap-4 bg-skin-card rounded-2xl p-4 border border-skin-border">
+      {/* Step number circle */}
+      <div className="w-7 h-7 rounded-full border border-skin-gold/45 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span className="font-display text-sm font-light text-skin-gold leading-none">
           {index + 1}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-800 text-sm mb-0.5">{step.step}</p>
-          <p className="text-xs text-gray-500 mb-3">{step.productType}</p>
+        </span>
+      </div>
 
-          {step.keyIngredients.length > 0 && (
-            <div className="mb-2">
-              <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-1">
-                Look for
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {step.keyIngredients.map((ingredient) => (
-                  <span
-                    key={ingredient}
-                    className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-full"
-                  >
-                    {ingredient}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-body font-medium text-skin-cream">{step.step}</p>
+        <p className="text-[11px] text-skin-muted font-body mt-0.5 mb-3">{step.productType}</p>
 
-          {step.avoid.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-rose-700 uppercase tracking-wide mb-1">
-                Avoid
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {step.avoid.map((item) => (
-                  <span
-                    key={item}
-                    className="px-2 py-0.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-full"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
+        {step.keyIngredients.length > 0 && (
+          <div className="mb-2.5">
+            <p className="text-[9px] font-body font-semibold text-skin-faint uppercase tracking-[0.18em] mb-1.5">
+              Look for
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {step.keyIngredients.map((ingredient) => (
+                <span
+                  key={ingredient}
+                  className="px-2 py-0.5 bg-skin-gold/10 text-skin-gold text-[10px] font-body rounded-full border border-skin-gold/20"
+                >
+                  {ingredient}
+                </span>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {step.avoid.length > 0 && (
+          <div>
+            <p className="text-[9px] font-body font-semibold text-skin-faint uppercase tracking-[0.18em] mb-1.5">
+              Avoid
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {step.avoid.map((item) => (
+                <span
+                  key={item}
+                  className="px-2 py-0.5 bg-skin-red/10 text-skin-red text-[10px] font-body rounded-full border border-skin-red/20 line-through"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function RoutineSection({
-  title,
+function SectionHeading({
   icon,
-  steps,
-  headerClass,
-  accentClass,
+  title,
+  count,
 }: {
-  title: string;
   icon: string;
-  steps: RoutineStep[];
-  headerClass: string;
-  accentClass: string;
+  title: string;
+  count: number;
 }) {
   return (
-    <div>
-      <div className={`flex items-center gap-2 mb-3 px-4 py-2 rounded-xl ${headerClass}`}>
-        <span className="text-xl">{icon}</span>
-        <h3 className="text-sm font-bold">{title}</h3>
-        <span className="ml-auto text-xs opacity-70">{steps.length} steps</span>
-      </div>
-      <div className="flex flex-col gap-3">
-        {steps.map((step, i) => (
-          <StepCard key={`${step.step}-${i}`} step={step} index={i} accent={accentClass} />
-        ))}
-      </div>
+    <div className="flex items-center gap-3 mb-4">
+      <span className="text-base leading-none">{icon}</span>
+      <h3 className="font-display text-xl font-light text-skin-cream flex-1">{title}</h3>
+      <span className="text-[10px] text-skin-faint font-body uppercase tracking-widest">
+        {count} steps
+      </span>
     </div>
   );
 }
@@ -95,51 +88,52 @@ export default function SkincareRoutine({
   tips,
 }: SkincareRoutineProps) {
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-10">
+      {/* Title */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-1">Your Personalized Routine</h2>
-        <p className="text-sm text-gray-500">
-          Ingredient-based recommendations tailored to your skin analysis.
+        <h2 className="font-display text-2xl font-light text-skin-cream">Your Routine</h2>
+        <p className="text-xs text-skin-muted font-body mt-1.5 tracking-wide">
+          Personalized recommendations based on your analysis
         </p>
       </div>
 
       {morningRoutine.length > 0 && (
-        <RoutineSection
-          title="Morning Routine"
-          icon="☀️"
-          steps={morningRoutine}
-          headerClass="bg-amber-50 text-amber-800 border border-amber-100"
-          accentClass="bg-amber-400"
-        />
+        <div>
+          <SectionHeading icon="☀" title="Morning" count={morningRoutine.length} />
+          <div className="flex flex-col gap-3">
+            {morningRoutine.map((step, i) => (
+              <StepCard key={`${step.step}-${i}`} step={step} index={i} />
+            ))}
+          </div>
+        </div>
       )}
 
       {eveningRoutine.length > 0 && (
-        <RoutineSection
-          title="Evening Routine"
-          icon="🌙"
-          steps={eveningRoutine}
-          headerClass="bg-indigo-50 text-indigo-800 border border-indigo-100"
-          accentClass="bg-indigo-500"
-        />
+        <div>
+          <div className="w-full h-[1px] bg-skin-border mb-10" />
+          <SectionHeading icon="◑" title="Evening" count={eveningRoutine.length} />
+          <div className="flex flex-col gap-3">
+            {eveningRoutine.map((step, i) => (
+              <StepCard key={`${step.step}-${i}`} step={step} index={i} />
+            ))}
+          </div>
+        </div>
       )}
 
       {tips.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-3 px-4 py-2 rounded-xl bg-teal-50 text-teal-800 border border-teal-100">
-            <span className="text-xl">💡</span>
-            <h3 className="text-sm font-bold">Lifestyle Tips</h3>
-            <span className="ml-auto text-xs opacity-70">{tips.length} tips</span>
-          </div>
-          <ul className="flex flex-col gap-2">
+          <div className="w-full h-[1px] bg-skin-border mb-10" />
+          <SectionHeading icon="◆" title="Lifestyle Tips" count={tips.length} />
+          <ul className="flex flex-col gap-2.5">
             {tips.map((tip, i) => (
               <li
                 key={i}
-                className="flex items-start gap-3 bg-white border border-teal-100 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-shadow"
+                className="flex items-start gap-3 bg-skin-card rounded-2xl px-4 py-3.5 border border-skin-border"
               >
-                <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                <span className="text-[10px] font-body text-skin-rose/60 mt-0.5 flex-shrink-0 w-4 text-center tabular-nums">
                   {i + 1}
                 </span>
-                <span className="text-sm text-gray-700">{tip}</span>
+                <span className="text-xs text-skin-muted font-body leading-relaxed">{tip}</span>
               </li>
             ))}
           </ul>
