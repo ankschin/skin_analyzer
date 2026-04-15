@@ -1,11 +1,10 @@
 import Groq from "groq-sdk";
 import type { AnalysisResult } from "./types";
 
-const PROMPT = `You are a professional dermatologist assistant. Analyze the skin in this face photo carefully.
+const PROMPT = `You are a professional dermatologist assistant. Analyze the skin in this face photo and return condition scores.
 
 Return ONLY a valid JSON object (no markdown, no explanation) with this exact shape:
 {
-  "overallScore": <number 0-100>,
   "skinType": <"oily" | "dry" | "combination" | "normal">,
   "conditions": {
     "acne":      { "score": <0-10>, "description": "<1 sentence>" },
@@ -24,10 +23,19 @@ Return ONLY a valid JSON object (no markdown, no explanation) with this exact sh
   ],
   "tips": ["<lifestyle tip>"]
 }
-overallScore should vary for changes in face.
 
-Score interpretation: 0 = none/perfect, 10 = severe/very poor.
-overallScore: 100 = perfect skin, 80-99 = very good skin, 60-80 = average skin, 40-60 = below average(need attention) 0-40 = very poor condition.
+For conditions (acne, darkSpots, redness, pores, wrinkles, texture): 0 = zero visible signs, 10 = severe.
+For hydration: 0 = severely dehydrated/flaky, 10 = perfectly plump and hydrated.
+
+Be accurate and specific — use the full 0-10 range. Do not default to middle values:
+- acne: 0 = no blemishes at all | 2 = 1-2 minor spots | 5 = moderate breakouts | 8+ = severe/cystic acne
+- darkSpots: 0 = perfectly even tone | 2 = barely perceptible | 5 = clearly visible spots | 8+ = heavy hyperpigmentation
+- redness: 0 = no redness | 2 = very faint | 5 = moderate redness across cheeks | 8+ = intense redness/rosacea
+- pores: 0 = invisible pores | 2 = only visible up close | 5 = clearly visible | 8+ = very enlarged
+- wrinkles: 0 = no lines | 2 = faint expression lines | 5 = moderate wrinkles | 8+ = deep wrinkles
+- texture: 0 = perfectly smooth | 2 = very slightly uneven | 5 = rough/bumpy patches | 8+ = very rough
+- hydration: 10 = perfectly hydrated | 7 = well hydrated | 5 = adequately hydrated | 2 = dry/tight | 0 = severely dehydrated
+
 Also suggest foods to eat/focus on for improving based on skin condition.
 Do NOT recommend specific brand or product names — only ingredient types and product categories.`;
 
@@ -64,7 +72,22 @@ export async function analyzeImage(imageBase64: string): Promise<AnalysisResult>
       const jsonText = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
 
       try {
-        return JSON.parse(jsonText) as AnalysisResult;
+        const data = JSON.parse(jsonText) as AnalysisResult;
+        // Compute overall score from condition scores so it reflects actual analysis,
+        // not the model's tendency to anchor around 70.
+        const c = data.conditions;
+        const severityScores = [
+          c.acne.score,
+          c.darkSpots.score,
+          c.redness.score,
+          c.pores.score,
+          c.wrinkles.score,
+          c.texture.score,
+          10 - c.hydration.score, // invert: higher hydration = lower severity
+        ];
+        const avgSeverity = severityScores.reduce((a, b) => a + b, 0) / severityScores.length;
+        data.overallScore = Math.round((1 - avgSeverity / 10) * 100);
+        return data;
       } catch {
         throw new Error("Could not analyze the image. Please ensure your face is clearly visible.");
       }
