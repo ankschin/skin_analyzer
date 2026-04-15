@@ -10,7 +10,7 @@ interface SkincareRoutineProps {
 
 function StepCard({ step, index }: { step: RoutineStep; index: number }) {
   return (
-    <div className="flex items-start gap-4 bg-skin-card rounded-2xl p-4 border border-skin-border">
+    <div className="flex items-start gap-4 bg-skin-card rounded-2xl p-4 border border-skin-border shadow-sm shadow-skin-rim/10">
       {/* Step number circle */}
       <div className="w-7 h-7 rounded-full border border-skin-gold/45 flex items-center justify-center flex-shrink-0 mt-0.5">
         <span className="font-display text-sm font-light text-skin-gold leading-none">
@@ -128,7 +128,7 @@ export default function SkincareRoutine({
             {tips.map((tip, i) => (
               <li
                 key={i}
-                className="flex items-start gap-3 bg-skin-card rounded-2xl px-4 py-3.5 border border-skin-border"
+                className="flex items-start gap-3 bg-skin-card rounded-2xl px-4 py-3.5 border border-skin-border shadow-sm shadow-skin-rim/10"
               >
                 <span className="text-[10px] font-body text-skin-rose/60 mt-0.5 flex-shrink-0 w-4 text-center tabular-nums">
                   {i + 1}

@@ -33,9 +33,9 @@ function getOverallLabel(score: number): string {
 }
 
 function getRingColor(score: number): string {
-  if (score >= 75) return "#7DAF8F";
-  if (score >= 50) return "#C9A96E";
-  return "#B87070";
+  if (score >= 75) return "#4A7C5E";
+  if (score >= 50) return "#9A6F42";
+  return "#8C3E3E";
 }
 
 function getConditionTheme(effectiveScore: number) {
@@ -59,7 +59,7 @@ function ScoreRing({ score }: { score: number }) {
         <circle
           cx="60" cy="60" r={radius}
           fill="none"
-          stroke="#2C2825"
+          stroke="#E2D9CE"
           strokeWidth="5"
         />
         {/* Progress */}
@@ -99,7 +99,7 @@ function ConditionCard({
   const theme = getConditionTheme(effectiveScore);
 
   return (
-    <div className={`bg-skin-card rounded-2xl p-4 border ${theme.border}`}>
+    <div className={`bg-skin-card rounded-2xl p-4 border shadow-sm shadow-skin-rim/10 ${theme.border}`}>
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-body font-medium text-skin-cream/80">{label}</span>
         <span className={`text-xs font-body font-semibold tabular-nums ${theme.text}`}>
@@ -128,7 +128,7 @@ export default function SkinReport({ result, capturedImage, onReset }: SkinRepor
     <div className="flex flex-col gap-8 animate-fade-up">
 
       {/* Hero card */}
-      <div className="bg-skin-surface rounded-3xl p-7 border border-skin-border">
+      <div className="bg-skin-surface rounded-3xl p-7 border border-skin-border shadow-sm shadow-skin-rim/20">
         <ScoreRing score={result.overallScore} />
 
         <div className="text-center mt-5">

@@ -38,7 +38,7 @@ export default function ImagePreview({
 
         {/* Analyzing overlay */}
         {isAnalyzing && (
-          <div className="absolute inset-0 bg-skin-bg/72 backdrop-blur-sm flex flex-col items-center justify-end pb-12 gap-6">
+          <div className="absolute inset-0 bg-skin-surface/80 backdrop-blur-sm flex flex-col items-center justify-end pb-12 gap-6">
             {/* Scanning beam */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-skin-gold/70 to-transparent animate-scan-beam" />

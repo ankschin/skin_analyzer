@@ -114,7 +114,7 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
           Face Capture
         </h2>
         <p className="text-xs text-skin-muted font-body tracking-wide">
-          Center your face within the guide frame
+          Position your face in the center of the frame
         </p>
       </div>
 
@@ -148,31 +148,6 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
                 style={{ transform: "scaleX(-1)" }}
               />
 
-              {/* Face guide overlay */}
-              {!isLoading && (
-                <div className="absolute inset-0 pointer-events-none">
-                  {/* Dashed oval */}
-                  <svg
-                    className="absolute inset-0 w-full h-full"
-                    viewBox="0 0 100 133"
-                    preserveAspectRatio="none"
-                  >
-                    <ellipse
-                      cx="50" cy="48" rx="26" ry="34"
-                      fill="none"
-                      stroke="rgba(201,169,110,0.30)"
-                      strokeWidth="0.45"
-                      strokeDasharray="2.5 2"
-                    />
-                  </svg>
-
-                  {/* Corner brackets — gold */}
-                  <div className="absolute top-[9%]  left-[15%]  w-8 h-8 border-t border-l border-skin-gold/50" />
-                  <div className="absolute top-[9%]  right-[15%] w-8 h-8 border-t border-r border-skin-gold/50" />
-                  <div className="absolute bottom-[20%] left-[15%]  w-8 h-8 border-b border-l border-skin-gold/50" />
-                  <div className="absolute bottom-[20%] right-[15%] w-8 h-8 border-b border-r border-skin-gold/50" />
-                </div>
-              )}
 
               {/* Bottom gradient fade */}
               <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-black/65 to-transparent pointer-events-none" />

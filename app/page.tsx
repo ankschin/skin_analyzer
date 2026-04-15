@@ -69,8 +69,8 @@ export default function HomePage() {
     <main className="min-h-screen bg-skin-bg relative overflow-x-hidden">
       {/* Ambient glow orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-1/3 -left-1/4 w-3/4 h-3/4 rounded-full bg-skin-rose/5 blur-[160px]" />
-        <div className="absolute -bottom-1/4 -right-1/4 w-2/3 h-2/3 rounded-full bg-skin-gold/5 blur-[160px]" />
+        <div className="absolute -top-1/3 -left-1/4 w-3/4 h-3/4 rounded-full bg-skin-rose/10 blur-[160px]" />
+        <div className="absolute -bottom-1/4 -right-1/4 w-2/3 h-2/3 rounded-full bg-skin-gold/10 blur-[160px]" />
       </div>
 
       <div className="relative mx-auto max-w-md px-5 py-10 z-10">
