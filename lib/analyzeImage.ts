@@ -24,9 +24,11 @@ Return ONLY a valid JSON object (no markdown, no explanation) with this exact sh
   ],
   "tips": ["<lifestyle tip>"]
 }
+overallScore should vary for changes in face.
 
 Score interpretation: 0 = none/perfect, 10 = severe/very poor.
-overallScore: 100 = perfect skin, 0 = very poor condition.
+overallScore: 100 = perfect skin, 80-99 = very good skin, 60-80 = average skin, 40-60 = below average(need attention) 0-40 = very poor condition.
+Also suggest foods to eat/focus on for improving based on skin condition.
 Do NOT recommend specific brand or product names — only ingredient types and product categories.`;
 
 export async function analyzeImage(imageBase64: string): Promise<AnalysisResult> {
